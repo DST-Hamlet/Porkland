@@ -9,7 +9,6 @@ local assets =
 
 local prefabs =
 {
-    "lavaarena_bernie",
 }
 
 local start_inv =
@@ -20,11 +19,12 @@ local start_inv =
         "bernie_inactive",
     },
 }
+
 for k, v in pairs(TUNING.GAMEMODE_STARTING_ITEMS) do
-	start_inv[string.lower(k)] = v.WILLOW
+    start_inv[string.lower(k)] = v.WILLOW
 end
 
-prefabs = FlattenTree({ prefabs, start_inv }, true)
+prefabs = FlattenTree({prefabs, start_inv}, true)
 
 for k, v in pairs(start_inv) do
     for i1, v1 in ipairs(v) do
@@ -34,8 +34,13 @@ for k, v in pairs(start_inv) do
     end
 end
 
+local function customidleanimfn(inst)
+    local item = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
+    return item ~= nil and item.prefab == "bernie_inactive" and "idle_willow" or nil
+end
+
 local function sanityfn(inst)
-    local x, y, z = inst.Transform:GetWorldPosition() 
+    local x, y, z = inst.Transform:GetWorldPosition()
     local delta = 0
     local max_rad = 10
     local ents = TheSim:FindEntities(x, y, z, max_rad, { "fire" })
@@ -54,14 +59,6 @@ end
 local function common_postinit(inst)
     inst:AddTag("pyromaniac")
     inst:AddTag("expertchef")
-
-    if TheNet:GetServerGameMode() == "lavaarena" then
-        inst:AddTag("bernie_reviver")
-
-        inst:AddComponent("pethealthbar")
-    elseif TheNet:GetServerGameMode() == "quagmire" then
-        inst:AddTag("quagmire_shopper")
-    end
 end
 
 local function UpdateSanityTemperature(inst)
@@ -87,7 +84,9 @@ local function UpdateSanityTemperature(inst)
 end
 
 local function master_postinit(inst)
-    inst.starting_inventory = start_inv[TheNet:GetServerGameMode()] or start_inv.default
+    inst.starting_inventory = start_inv.default
+
+    inst.customidleanim = customidleanimfn
 
     inst.components.health.fire_damage_scale = TUNING.WILLOW_FIRE_DAMAGE
     inst.components.health.fire_timestart = TUNING.WILLOW_FIRE_IMMUNITY
@@ -97,12 +96,6 @@ local function master_postinit(inst)
     inst.components.sanity.rate_modifier = TUNING.WILLOW_SANITY_MODIFIER
 
     inst:DoPeriodicTask(.1, UpdateSanityTemperature, 0)
-
-    if TheNet:GetServerGameMode() == "lavaarena" then
-        event_server_data("lavaarena", "prefabs/willow").master_postinit(inst)
-    elseif TheNet:GetServerGameMode() == "quagmire" then
-        event_server_data("quagmire", "prefabs/willow").master_postinit(inst)
-    end
 end
 
 return MakePlayerCharacter("willow", prefabs, assets, common_postinit, master_postinit)

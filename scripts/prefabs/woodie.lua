@@ -1,5 +1,4 @@
 local MakePlayerCharacter = require("prefabs/player_common")
-local easing = require("easing")
 
 local assets =
 {
@@ -34,11 +33,12 @@ local start_inv =
         "lucy",
     },
 }
+
 for k, v in pairs(TUNING.GAMEMODE_STARTING_ITEMS) do
 	start_inv[string.lower(k)] = v.WOODIE
 end
 
-prefabs = FlattenTree({ prefabs, start_inv }, true)
+prefabs = FlattenTree({prefabs, start_inv}, true)
 
 local BEAVERVISION_COLOURCUBES =
 {
@@ -72,10 +72,10 @@ local BEAVER_LMB_ACTIONS =
 local BEAVER_ACTION_TAGS = {}
 
 for i, v in ipairs(BEAVER_LMB_ACTIONS) do
-    table.insert(BEAVER_ACTION_TAGS, v.."_workable")
+    table.insert(BEAVER_ACTION_TAGS, v .. "_workable")
 end
 
-local BEAVER_TARGET_EXCLUDE_TAGS = { "FX", "NOCLICK", "DECOR", "INLIMBO", "catchable", "sign" }
+local BEAVER_TARGET_EXCLUDE_TAGS = {"FX", "NOCLICK", "DECOR", "INLIMBO", "catchable", "sign"}
 
 local function CannotExamine(inst)
     return false
@@ -120,13 +120,13 @@ local function LeftClickPicker(inst, target)
     if target ~= nil and target ~= inst then
         if inst.replica.combat:CanTarget(target) then
             return (not target:HasTag("player") or inst.components.playercontroller:IsControlPressed(CONTROL_FORCE_ATTACK))
-                and inst.components.playeractionpicker:SortActionList({ ACTIONS.ATTACK }, target, nil)
+                and inst.components.playeractionpicker:SortActionList({ACTIONS.ATTACK}, target, nil)
                 or nil
         end
         for i, v in ipairs(BEAVER_LMB_ACTIONS) do
-            if target:HasTag(v.."_workable") then
+            if target:HasTag(v .. "_workable") then
                 return not target:HasTag("sign")
-                    and inst.components.playeractionpicker:SortActionList({ ACTIONS[v] }, target, nil)
+                    and inst.components.playeractionpicker:SortActionList({ACTIONS[v]}, target, nil)
                     or nil
             end
         end
@@ -521,7 +521,7 @@ local function onbecamebeaver(inst)
 end
 
 local function onrespawnedfromghost(inst)
-    inst.components.beaverness:StartTimeEffect(1, -.75 * inst.components.beaverness.max / TUNING.BEAVER_DRAIN_TIME)
+    inst.components.beaverness:StartTimeEffect(1, -0.75 * inst.components.beaverness.max / TUNING.BEAVER_DRAIN_TIME)
 
     if inst._wasnomorph == nil then
         inst._wasnomorph = inst.sg:HasStateTag("nomorph") or inst.sg:HasStateTag("silentmorph")
@@ -623,25 +623,20 @@ local function common_postinit(inst)
     --bearded (from beard component) added to pristine state for optimization
     inst:AddTag("bearded")
 
-    if TheNet:GetServerGameMode() == "lavaarena" then
-        --do nothing
-    elseif TheNet:GetServerGameMode() == "quagmire" then
-        inst:AddTag("quagmire_shopper")
-    else
-        --beaverness (from beaverness component) added to pristine state for optimization
-        inst:AddTag("beaverness")
 
-        inst.GetBeaverness = GetBeaverness -- Didn't want to make beaverness a networked component
-        inst.IsBeaverStarving = IsBeaverStarving -- Didn't want to make beaverness a networked component
+    --beaverness (from beaverness component) added to pristine state for optimization
+    inst:AddTag("beaverness")
 
-        inst.isbeavermode = net_bool(inst.GUID, "woodie.isbeavermode", "isbeavermodedirty")
-        inst:ListenForEvent("playeractivated", OnPlayerActivated)
-        inst:ListenForEvent("playerdeactivated", OnPlayerDeactivated)
+    inst.GetBeaverness = GetBeaverness -- Didn't want to make beaverness a networked component
+    inst.IsBeaverStarving = IsBeaverStarving -- Didn't want to make beaverness a networked component
 
-        if inst.ghostenabled then
-            inst._SetGhostMode = inst.SetGhostMode
-            inst.SetGhostMode = SetGhostMode
-        end
+    inst.isbeavermode = net_bool(inst.GUID, "woodie.isbeavermode", "isbeavermodedirty")
+    inst:ListenForEvent("playeractivated", OnPlayerActivated)
+    inst:ListenForEvent("playerdeactivated", OnPlayerDeactivated)
+
+    if inst.ghostenabled then
+        inst._SetGhostMode = inst.SetGhostMode
+        inst.SetGhostMode = SetGhostMode
     end
 
     inst.components.frostybreather:SetOffsetFn(GetFrostyBreatherOffset)
@@ -652,37 +647,31 @@ local function common_postinit(inst)
 end
 
 local function master_postinit(inst)
-    inst.starting_inventory = start_inv[TheNet:GetServerGameMode()] or start_inv.default
+    inst.starting_inventory = start_inv.default
 
-    if TheNet:GetServerGameMode() == "lavaarena" then
-        event_server_data("lavaarena", "prefabs/woodie").master_postinit(inst)
-    elseif TheNet:GetServerGameMode() == "quagmire" then
-		-- nothing to see here (dont go into the else case, or else!)
-    else
-        -- Give Woodie a beard so he gets some insulation from winter cold
-        -- (Value is Wilson's level 2 beard.)
-        inst:AddComponent("beard")
-        inst.components.beard.canshavetest = CanShaveTest
-        inst.components.beard.onreset = OnResetBeard
-        inst.components.beard:EnableGrowth(false)
+    -- Give Woodie a beard so he gets some insulation from winter cold
+    -- (Value is Wilson's level 2 beard.)
+    inst:AddComponent("beard")
+    inst.components.beard.canshavetest = CanShaveTest
+    inst.components.beard.onreset = OnResetBeard
+    inst.components.beard:EnableGrowth(false)
 
-        OnResetBeard(inst)
+    OnResetBeard(inst)
 
-        inst:AddComponent("beaverness")
+    inst:AddComponent("beaverness")
 
-        inst._getstatus = nil
-        inst._wasnomorph = nil
-        inst.TransformBeaver = TransformBeaver
+    inst._getstatus = nil
+    inst._wasnomorph = nil
+    inst.TransformBeaver = TransformBeaver
 
-        inst:ListenForEvent("ms_respawnedfromghost", onrespawnedfromghost)
-        inst:ListenForEvent("ms_becameghost", onbecameghost)
+    inst:ListenForEvent("ms_respawnedfromghost", onrespawnedfromghost)
+    inst:ListenForEvent("ms_becameghost", onbecameghost)
 
-        onrespawnedfromghost(inst)
+    onrespawnedfromghost(inst)
 
-        inst.OnSave = onsave
-        inst.OnLoad = onload
-        inst.OnPreLoad = onpreload
-    end
+    inst.OnSave = onsave
+    inst.OnLoad = onload
+    inst.OnPreLoad = onpreload
 end
 
 return MakePlayerCharacter("woodie", prefabs, assets, common_postinit, master_postinit)

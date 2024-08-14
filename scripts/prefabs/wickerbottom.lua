@@ -24,7 +24,7 @@ for k, v in pairs(TUNING.GAMEMODE_STARTING_ITEMS) do
 	start_inv[string.lower(k)] = v.WICKERBOTTOM
 end
 
-prefabs = FlattenTree({ prefabs, start_inv }, true)
+prefabs = FlattenTree({prefabs, start_inv}, true)
 
 for k, v in pairs(start_inv) do
     for i1, v1 in ipairs(v) do
@@ -34,21 +34,21 @@ for k, v in pairs(start_inv) do
     end
 end
 
+local function customidleanimfn(inst)
+    return inst.AnimState:CompareSymbolBuilds("hand", "hand_wickerbottom") and "idle_wickerbottom" or nil
+end
+
 local function common_postinit(inst)
     inst:AddTag("insomniac")
     inst:AddTag("bookbuilder")
-
-    if TheNet:GetServerGameMode() == "quagmire" then
-        inst:AddTag("quagmire_foodie")
-        inst:AddTag("quagmire_shopper")
-    end
-
     --reader (from reader component) added to pristine state for optimization
     inst:AddTag("reader")
 end
 
 local function master_postinit(inst)
-    inst.starting_inventory = start_inv[TheNet:GetServerGameMode()] or start_inv.default
+    inst.starting_inventory = start_inv.default
+
+    inst.customidleanim = customidleanimfn
 
     inst:AddComponent("reader")
 
@@ -62,12 +62,6 @@ local function master_postinit(inst)
     inst.components.sanity:SetMax(TUNING.WICKERBOTTOM_SANITY)
 
     inst.components.builder.science_bonus = 1
-
-    if TheNet:GetServerGameMode() == "lavaarena" then
-        event_server_data("lavaarena", "prefabs/wickerbottom").master_postinit(inst)
-    elseif TheNet:GetServerGameMode() == "quagmire" then
-        event_server_data("quagmire", "prefabs/wickerbottom").master_postinit(inst)
-    end
 end
 
 return MakePlayerCharacter("wickerbottom", prefabs, assets, common_postinit, master_postinit)

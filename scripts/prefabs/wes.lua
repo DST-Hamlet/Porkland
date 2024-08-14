@@ -14,6 +14,7 @@ local start_inv =
         "balloons_empty",
     },
 }
+
 for k, v in pairs(TUNING.GAMEMODE_STARTING_ITEMS) do
 	start_inv[string.lower(k)] = v.WES
 end
@@ -31,25 +32,18 @@ end
 local function common_postinit(inst)
     inst:AddTag("mime")
     inst:AddTag("balloonomancer")
-
-    if TheNet:GetServerGameMode() == "quagmire" then
-        inst:AddTag("quagmire_cheapskate")
-    end
 end
 
 local function master_postinit(inst)
-    inst.starting_inventory = start_inv[TheNet:GetServerGameMode()] or start_inv.default
+    inst.starting_inventory = start_inv.default
 
-    inst.components.health:SetMaxHealth(TUNING.WILSON_HEALTH * .75)
-    inst.components.hunger:SetMax(TUNING.WILSON_HUNGER * .75)
+    inst.customidlestate = "wes_funnyidle"
+
+    inst.components.health:SetMaxHealth(TUNING.WILSON_HEALTH * 0.75)
+    inst.components.hunger:SetMax(TUNING.WILSON_HUNGER * 0.75)
     inst.components.hunger:SetRate(TUNING.WILSON_HUNGER_RATE * 1.25)
-    inst.components.sanity:SetMax(TUNING.WILSON_SANITY * .75)
-
-    if TheNet:GetServerGameMode() == "lavaarena" then
-        event_server_data("lavaarena", "prefabs/wes").master_postinit(inst)
-    else
-        inst.components.combat.damagemultiplier = TUNING.WES_DAMAGE_MULT
-    end
+    inst.components.sanity:SetMax(TUNING.WILSON_SANITY * 0.75)
+    inst.components.combat.damagemultiplier = TUNING.WES_DAMAGE_MULT
 end
 
 return MakePlayerCharacter("wes", prefabs, assets, common_postinit, master_postinit, prefabs)

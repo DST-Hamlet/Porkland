@@ -8,7 +8,6 @@ local assets =
 
 local prefabs =
 {
-    "lavaarena_abigail",
 }
 
 local start_inv =
@@ -18,21 +17,15 @@ local start_inv =
         "abigail_flower",
     },
 }
+
 for k, v in pairs(TUNING.GAMEMODE_STARTING_ITEMS) do
 	start_inv[string.lower(k)] = v.WENDY
 end
 
-prefabs = FlattenTree({ prefabs, start_inv }, true)
+prefabs = FlattenTree({prefabs, start_inv}, true)
 
 local function common_postinit(inst)
     inst:AddTag("ghostlyfriend")
-
-    if TheNet:GetServerGameMode() == "lavaarena" then
-        inst:AddComponent("pethealthbar")
-    elseif TheNet:GetServerGameMode() == "quagmire" then
-        inst:AddTag("quagmire_grillmaster")
-        inst:AddTag("quagmire_shopper")
-    end
 end
 
 local function OnDespawn(inst)
@@ -66,24 +59,20 @@ local function OnLoad(inst, data)
 end
 
 local function master_postinit(inst)
-    inst.starting_inventory = start_inv[TheNet:GetServerGameMode()] or start_inv.default
+    inst.starting_inventory = start_inv.default
 
     inst.components.sanity.night_drain_mult = TUNING.WENDY_SANITY_MULT
     inst.components.sanity.neg_aura_mult = TUNING.WENDY_SANITY_MULT
 
     inst.abigail = nil
 
-    if TheNet:GetServerGameMode() == "lavaarena" then
-        event_server_data("lavaarena", "prefabs/wendy").master_postinit(inst, OnSave, OnLoad)
-    else
-        inst.abigail_flowers = {}
+    inst.abigail_flowers = {}
 
-        inst.components.combat.damagemultiplier = TUNING.WENDY_DAMAGE_MULT
+    inst.components.combat.damagemultiplier = TUNING.WENDY_DAMAGE_MULT
 
-        inst.OnDespawn = OnDespawn
-        inst.OnSave = OnSave
-        inst.OnLoad = OnLoad
-    end
+    inst.OnDespawn = OnDespawn
+    inst.OnSave = OnSave
+    inst.OnLoad = OnLoad
 end
 
 return MakePlayerCharacter("wendy", prefabs, assets, common_postinit, master_postinit)

@@ -29,7 +29,7 @@ local function OnDismounted(inst)
     inst.components.locomotor:RemoveExternalSpeedMultiplier(inst, "mounted_mightiness")
 end
 
-local function applymightiness(inst)
+local function ApplyMightiness(inst)
     local percent = inst.components.hunger:GetPercent()
 
     local damage_mult = TUNING.WOLFGANG_ATTACKMULT_NORMAL
@@ -70,7 +70,7 @@ local function applymightiness(inst)
     end
 end
 
-local function becomewimpy(inst, silent)
+local function BecomeWimpy(inst, silent)
     if inst.strength == "wimpy" then
         return
     end
@@ -88,7 +88,7 @@ local function becomewimpy(inst, silent)
     inst.strength = "wimpy"
 end
 
-local function becomenormal(inst, silent)
+local function BecomeNormal(inst, silent)
     if inst.strength == "normal" then
         return
     end
@@ -112,7 +112,7 @@ local function becomenormal(inst, silent)
     inst.strength = "normal"
 end
 
-local function becomemighty(inst, silent)
+local function BecomeMighty(inst, silent)
     if inst.strength == "mighty" then
         return
     end
@@ -130,7 +130,7 @@ local function becomemighty(inst, silent)
     inst.strength = "mighty"
 end
 
-local function onhungerchange(inst, data, forcesilent)
+local function OnHungerChange(inst, data, forcesilent)
     if inst.sg:HasStateTag("nomorph") or
         inst:HasTag("playerghost") or
         inst.components.health:IsDead() then
@@ -142,38 +142,38 @@ local function onhungerchange(inst, data, forcesilent)
     if inst.strength == "mighty" then
         if inst.components.hunger.current < TUNING.WOLFGANG_END_MIGHTY_THRESH then
             if silent and inst.components.hunger.current < TUNING.WOLFGANG_START_WIMPY_THRESH then
-                becomewimpy(inst, true)
+                BecomeWimpy(inst, true)
             else
-                becomenormal(inst, silent)
+                BecomeNormal(inst, silent)
             end
         end
     elseif inst.strength == "wimpy" then
         if inst.components.hunger.current > TUNING.WOLFGANG_END_WIMPY_THRESH then
             if silent and inst.components.hunger.current > TUNING.WOLFGANG_START_MIGHTY_THRESH then
-                becomemighty(inst, true)
+                BecomeMighty(inst, true)
             else
-                becomenormal(inst, silent)
+                BecomeNormal(inst, silent)
             end
         end
     elseif inst.components.hunger.current > TUNING.WOLFGANG_START_MIGHTY_THRESH then
-        becomemighty(inst, silent)
+        BecomeMighty(inst, silent)
     elseif inst.components.hunger.current < TUNING.WOLFGANG_START_WIMPY_THRESH then
-        becomewimpy(inst, silent)
+        BecomeWimpy(inst, silent)
     end
 
-    applymightiness(inst)
+    ApplyMightiness(inst)
 end
 
-local function onnewstate(inst)
+local function OnNewState(inst)
     if inst._wasnomorph ~= inst.sg:HasStateTag("nomorph") then
         inst._wasnomorph = not inst._wasnomorph
         if not inst._wasnomorph then
-            onhungerchange(inst)
+            OnHungerChange(inst)
         end
     end
 end
 
-local function onbecamehuman(inst, data)
+local function OnBecameHuman(inst, data)
     if inst._wasnomorph == nil then
         if not (data ~= nil and data.corpse) then
             inst.strength = "normal"
@@ -181,13 +181,13 @@ local function onbecamehuman(inst, data)
         inst._wasnomorph = inst.sg:HasStateTag("nomorph")
         inst.talksoundoverride = nil
         inst.hurtsoundoverride = nil
-        inst:ListenForEvent("hungerdelta", onhungerchange)
-        inst:ListenForEvent("newstate", onnewstate)
-        onhungerchange(inst, nil, true)
+        inst:ListenForEvent("hungerdelta", OnHungerChange)
+        inst:ListenForEvent("newstate", OnNewState)
+        OnHungerChange(inst, nil, true)
     end
 end
 
-local function onbecameghost(inst, data)
+local function OnBecameGhost(inst, data)
     if inst._wasnomorph ~= nil then
         if not (data ~= nil and data.corpse) then
             inst.strength = "normal"
@@ -195,64 +195,40 @@ local function onbecameghost(inst, data)
         inst._wasnomorph = nil
         inst.talksoundoverride = nil
         inst.hurtsoundoverride = nil
-        inst:RemoveEventCallback("hungerdelta", onhungerchange)
-        inst:RemoveEventCallback("newstate", onnewstate)
+        inst:RemoveEventCallback("hungerdelta", OnHungerChange)
+        inst:RemoveEventCallback("newstate", OnNewState)
     end
 end
 
-local function onload(inst)
-    inst:ListenForEvent("ms_respawnedfromghost", onbecamehuman)
-    inst:ListenForEvent("ms_becameghost", onbecameghost)
+local function OnLoad(inst)
+    inst:ListenForEvent("ms_respawnedfromghost", OnBecameHuman)
+    inst:ListenForEvent("ms_becameghost", OnBecameGhost)
 
     --Restore absolute health value from loading after mightiness scaling
     local loadhealth = inst._loadhealth or inst.components.health.currenthealth
     inst._loadhealth = nil
 
     if inst:HasTag("playerghost") then
-        onbecameghost(inst)
+        OnBecameGhost(inst)
     elseif inst:HasTag("corpse") then
-        onbecameghost(inst, { corpse = true })
+        OnBecameGhost(inst, { corpse = true })
     else
-        onbecamehuman(inst)
+        OnBecameHuman(inst)
     end
 
     inst.components.health:SetPercent(loadhealth / inst.components.health.maxhealth, true)
 end
 
-local function onpreload(inst, data)
+local function OnPreLoad(inst, data)
     if data ~= nil and data.health ~= nil then
         inst._loadhealth = data.health.health
     end
 end
 
---------------------------------------------------------------------------
-
-local BASE_PHYSICS_RADIUS = .5
-local AVATAR_SCALE = 1.5
-
-local function lavaarena_onisavatardirty(inst)
-    inst:SetPhysicsRadiusOverride(inst._isavatar:value() and AVATAR_SCALE * BASE_PHYSICS_RADIUS or BASE_PHYSICS_RADIUS)
-end
-
---------------------------------------------------------------------------
-
-local function common_postinit(inst)
-    if TheNet:GetServerGameMode() == "lavaarena" then
-        inst._isavatar = net_bool(inst.GUID, "wolfgang._isavatar", "isavatardirty")
-
-        if not TheWorld.ismastersim then
-            inst:ListenForEvent("isavatardirty", lavaarena_onisavatardirty)
-        end
-
-        lavaarena_onisavatardirty(inst)
-    elseif TheNet:GetServerGameMode() == "quagmire" then
-        inst:AddTag("quagmire_ovenmaster")
-        inst:AddTag("quagmire_shopper")
-    end
-end
-
 local function master_postinit(inst)
-    inst.starting_inventory = start_inv[TheNet:GetServerGameMode()] or start_inv.default
+    inst.starting_inventory = start_inv.default
+
+    inst.customidleanim = "idle_wolfgang"
 
     inst.strength = "normal"
     inst._mightiness_scale = 1
@@ -261,24 +237,18 @@ local function master_postinit(inst)
     inst.hurtsoundoverride = nil
 
     inst.components.hunger:SetMax(TUNING.WOLFGANG_HUNGER)
+    inst.components.health:SetMaxHealth(TUNING.WOLFGANG_HEALTH_NORMAL)
+    inst.components.hunger.current = TUNING.WOLFGANG_START_HUNGER
 
-    if TheNet:GetServerGameMode() == "lavaarena" then
-        inst.OnIsAvatarDirty = lavaarena_onisavatardirty
-        event_server_data("lavaarena", "prefabs/wolfgang").master_postinit(inst)
-    else
-        inst.components.health:SetMaxHealth(TUNING.WOLFGANG_HEALTH_NORMAL)
-        inst.components.hunger.current = TUNING.WOLFGANG_START_HUNGER
+    inst.components.sanity.night_drain_mult = 1.1
+    inst.components.sanity.neg_aura_mult = 1.1
 
-        inst.components.sanity.night_drain_mult = 1.1
-        inst.components.sanity.neg_aura_mult = 1.1
-
-        inst.OnPreLoad = onpreload
-        inst.OnLoad = onload
-        inst.OnNewSpawn = onload
-    end
+    inst.OnPreLoad = OnPreLoad
+    inst.OnLoad = OnLoad
+    inst.OnNewSpawn = OnLoad
 
     inst:ListenForEvent("mounted", OnMounted)
     inst:ListenForEvent("dismounted", OnDismounted)
 end
 
-return MakePlayerCharacter("wolfgang", prefabs, assets, common_postinit, master_postinit)
+return MakePlayerCharacter("wolfgang", prefabs, assets, nil, master_postinit)

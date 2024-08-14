@@ -656,6 +656,27 @@ TUNING.PROTOTYPER_TREES.HOGUSPORKUSATOR = TechTree.Create({
     MAGIC = 2,
 })
 
+TUNING.GAMEMODE_STARTING_ITEMS.DEFAULT = {
+    WILSON = {},
+    WILLOW = {"lighter", "bernie_inactive"},
+    WENDY = {"abigail_flower"},
+    WOLFGANG = {},
+    WX78 = {},
+    WICKERBOTTOM = {"papyrus", "papyrus"},
+    WES = {"balloons_empty"},
+    WAXWELL = {"waxwelljournal", "nightmarefuel", "nightmarefuel", "nightmarefuel", "nightmarefuel", "nightmarefuel", "nightmarefuel"},
+    WOODIE = {"lucy"},
+    WATHGRITHR = {"spear_wathgrithr", "wathgrithrhat", "meat", "meat", "meat", "meat"},
+    WEBBER = {"spidereggsack", "monstermeat", "monstermeat", "spider_whistle"},
+    WINONA = {"sewing_tape", "sewing_tape", "sewing_tape"},
+    WORTOX = {"wortox_soul", "wortox_soul", "wortox_soul", "wortox_soul", "wortox_soul", "wortox_soul"},
+    WORMWOOD = {},
+    WARLY = {"portablecookpot_item", "potato", "potato", "garlic"},
+    WURT = {},
+    WALTER = {"walterhat", "slingshot", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock"},
+    WANDA = {"pocketwatch_heal", "pocketwatch_parts", "pocketwatch_parts", "pocketwatch_parts"},
+    WONKEY = {},
+}
 
 for key, value in pairs(tuning) do
     if TUNING[key] then

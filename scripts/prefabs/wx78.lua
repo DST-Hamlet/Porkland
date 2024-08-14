@@ -18,14 +18,15 @@ local start_inv =
     {
     },
 }
+
 for k, v in pairs(TUNING.GAMEMODE_STARTING_ITEMS) do
 	start_inv[string.lower(k)] = v.WX78
 end
 
-prefabs = FlattenTree({ prefabs, start_inv }, true)
+prefabs = FlattenTree({prefabs, start_inv}, true)
 
 --hunger, health, sanity
-local function applyupgrades(inst)
+local function ApplyUpgrades(inst)
     local max_upgrades = 15
     inst.level = math.min(inst.level, max_upgrades)
 
@@ -46,26 +47,18 @@ local function applyupgrades(inst)
     inst.components.sanity.ignore = ignoresanity
 end
 
-local function oneat(inst, food)
-    if food and food.components.edible and food.components.edible.foodtype == FOODTYPE.GEARS then
-        --give an upgrade!
-        inst.level = inst.level + 1
-        applyupgrades(inst) 
-        inst.SoundEmitter:PlaySound("dontstarve/characters/wx78/levelup")
-
-        -- MarkL Can't do this here, need to do it inside the component
-        -- todo pax Move upgrade logic elsewhere.  
-        --inst.HUD.controls.status.heart:PulseGreen()
-        --inst.HUD.controls.status.stomach:PulseGreen()
-        --inst.HUD.controls.status.brain:PulseGreen()
-
-        --inst.HUD.controls.status.brain:ScaleTo(1.3,1,.7)
-        --inst.HUD.controls.status.heart:ScaleTo(1.3,1,.7)
-        --inst.HUD.controls.status.stomach:ScaleTo(1.3,1,.7)
+local function OnEat(inst, food)
+    if not food or not food.components.edible or food.components.edible.foodtype ~= FOODTYPE.GEARS then
+        return
     end
+
+    --give an upgrade!
+    inst.level = inst.level + 1
+    ApplyUpgrades(inst)
+    inst.SoundEmitter:PlaySound("dontstarve/characters/wx78/levelup")
 end
 
-local function onupdate(inst, dt)
+local function OnUpdate(inst, dt)
     inst.charge_time = inst.charge_time - dt
     if inst.charge_time <= 0 then
         inst.charge_time = 0
@@ -76,7 +69,7 @@ local function onupdate(inst, dt)
         inst.SoundEmitter:KillSound("overcharge_sound")
         inst:RemoveTag("overcharge")
         inst.Light:Enable(false)
-        inst.components.locomotor.runspeed = TUNING.WILSON_RUN_SPEED 
+        inst.components.locomotor.runspeed = TUNING.WILSON_RUN_SPEED
         inst.components.bloomer:PopBloom("overcharge")
         inst.components.temperature.mintemp = -20
         inst.components.talker:Say(GetString(inst, "ANNOUNCE_DISCHARGE"))
@@ -93,17 +86,16 @@ local function onupdate(inst, dt)
         inst.components.locomotor.runspeed = TUNING.WILSON_RUN_SPEED*(1+runspeed_bonus)
         inst.components.temperature.mintemp = 10
     end
-
 end
 
-local function onlongupdate(inst, dt)
+local function OnLongUpdate(inst, dt)
     inst.charge_time = math.max(0, inst.charge_time - dt)
 end
 
-local function onpreload(inst, data)
+local function OnPreLoad(inst, data)
     if data ~= nil and data.level ~= nil then
         inst.level = data.level
-        applyupgrades(inst)
+        ApplyUpgrades(inst)
         --re-set these from the save data, because of load-order clipping issues
         if data.health ~= nil and data.health.health ~= nil then
             inst.components.health:SetCurrentHealth(data.health.health)
@@ -120,34 +112,34 @@ local function onpreload(inst, data)
     end
 end
 
-local function startovercharge(inst, duration)
+local function StartOvercharge(inst, duration)
     inst.charge_time = duration
 
     inst:AddTag("overcharge")
-    inst:PushEvent("ms_overcharge")
+    inst:PushEvent("ms_overcharge") -- ziwbi: This one is for glow berry, maybe we should remove this
 
     inst.SoundEmitter:KillSound("overcharge_sound")
     inst.SoundEmitter:PlaySound("dontstarve/characters/wx78/charged", "overcharge_sound")
     inst.components.bloomer:PushBloom("overcharge", "shaders/anim.ksh", 50)
 
     if inst.charged_task == nil then
-        inst.charged_task = inst:DoPeriodicTask(1, onupdate, nil, 1)
-        onupdate(inst, 0)
+        inst.charged_task = inst:DoPeriodicTask(1, OnUpdate, nil, 1)
+        OnUpdate(inst, 0)
     end
 end
 
-local function onload(inst, data)
+local function OnLoad(inst, data)
     if data ~= nil and data.charge_time ~= nil then
-        startovercharge(inst, data.charge_time)
+        StartOvercharge(inst, data.charge_time)
     end
 end
 
-local function onsave(inst, data)
+local function OnSave(inst, data)
     data.level = inst.level > 0 and inst.level or nil
     data.charge_time = inst.charge_time > 0 and inst.charge_time or nil
 end
 
-local function onlightingstrike(inst)
+local function OnLightingStrike(inst)
     if inst.components.health ~= nil and not (inst.components.health:IsDead() or inst.components.health:IsInvincible()) then
         if inst.components.inventory:IsInsulated() then
             inst:PushEvent("lightningdamageavoided")
@@ -156,12 +148,12 @@ local function onlightingstrike(inst)
             inst.components.sanity:DoDelta(-TUNING.SANITY_LARGE)
             inst.components.talker:Say(GetString(inst, "ANNOUNCE_CHARGE"))
 
-            startovercharge(inst, CalcDiminishingReturns(inst.charge_time, TUNING.TOTAL_DAY_TIME))
+            StartOvercharge(inst, CalcDiminishingReturns(inst.charge_time, TUNING.TOTAL_DAY_TIME))
         end
     end
 end
 
-local function dorainsparks(inst, dt)
+local function DoRainSparks(inst, dt)
     if inst.components.moisture ~= nil and inst.components.moisture:GetMoisture() > 0 then
         local t = GetTime()
 
@@ -196,10 +188,10 @@ local function dorainsparks(inst, dt)
     end
 end
 
-local function onisraining(inst, israining)
+local function OnIsRaining(inst, israining)
     if israining then
         if inst.spark_task == nil then
-            inst.spark_task = inst:DoPeriodicTask(.1, dorainsparks, nil, .1)
+            inst.spark_task = inst:DoPeriodicTask(0.1, DoRainSparks, nil, 0.1)
         end
     elseif inst.spark_task ~= nil then
         inst.spark_task:Cancel()
@@ -207,22 +199,39 @@ local function onisraining(inst, israining)
     end
 end
 
-local function onbecamerobot(inst)
-    if not inst.watchingrain then
-        inst.watchingrain = true
-        inst:WatchWorldState("israining", onisraining)
-        onisraining(inst, TheWorld.state.israining)
+local function OnIsFoggy(inst, fog_state)
+    if fog_state ~= FOG_STATE.CLEAR then
+        if inst.spark_task == nil then
+            inst.spark_task = inst:DoPeriodicTask(0.1, DoRainSparks, nil, 0.1)
+        end
+    elseif inst.spark_task ~= nil then
+        inst.spark_task:Cancel()
+        inst.spark_task = nil
+    end
+end
+
+local function OnBecameRobot(inst)
+    if not inst.watching_rain then
+        inst.watching_rain = true
+        inst:WatchWorldState("israining", OnIsRaining)
+        OnIsRaining(inst, TheWorld.state.israining)
+    end
+
+    if not inst.watching_fog then
+        inst.watching_fog = true
+        inst:WatchWorldState("fogstate", OnIsFoggy)
+        OnIsFoggy(inst, TheWorld.state.fogstate)
     end
 
     --Override with overcharge light values
     inst.Light:Enable(false)
     inst.Light:SetRadius(2)
     inst.Light:SetFalloff(0.75)
-    inst.Light:SetIntensity(.9)
+    inst.Light:SetIntensity(0.9)
     inst.Light:SetColour(235 / 255, 121 / 255, 12 / 255)
 end
 
-local function onbecameghost(inst)
+local function OnBecameGhost(inst)
     --Cancel overcharge mode
     if inst.charged_task ~= nil then
         inst.charged_task:Cancel()
@@ -240,47 +249,52 @@ local function onbecameghost(inst)
         inst.spark_task = nil
     end
 
-    if inst.watchingrain then
-        inst.watchingrain = false
-        inst:StopWatchingWorldState("israining", onisraining)
+    if inst.watching_rain then
+        inst.watching_rain = false
+        inst:StopWatchingWorldState("israining", OnIsRaining)
+    end
+
+    if inst.watching_fog then
+        inst.watching_fog = false
+        inst:StopWatchingWorldState("fog_state", OnIsFoggy)
     end
 end
 
-local function ondeath(inst)
-    if inst.level > 0 then
-        local dropgears = math.random(math.floor(inst.level / 3), math.ceil(inst.level / 2))
-        if dropgears > 0 then
-            for i = 1, dropgears do
-                local gear = SpawnPrefab("gears")
-                if gear ~= nil then
-                    local x, y, z = inst.Transform:GetWorldPosition()
-                    if gear.Physics ~= nil then
-                        local speed = 2 + math.random()
-                        local angle = math.random() * 2 * PI
-                        gear.Transform:SetPosition(x, y + 1, z)
-                        gear.Physics:SetVel(speed * math.cos(angle), speed * 3, speed * math.sin(angle))
-                    else
-                        gear.Transform:SetPosition(x, y, z)
-                    end
-                    if gear.components.propagator ~= nil then
-                        gear.components.propagator:Delay(5)
-                    end
-                end
+local function OnDeath(inst)
+    if inst.level <= 0 then
+        return
+    end
+
+    local num_gears = math.random(math.floor(inst.level / 3), math.ceil(inst.level / 2))
+
+    for i = 1, num_gears do -- no need to check num_gears > 0 since "for i = 1, 0 do ... end" will not execute
+        local gear = SpawnPrefab("gears")
+        if gear ~= nil then
+            local x, y, z = inst.Transform:GetWorldPosition()
+            if gear.Physics ~= nil then
+                local speed = 2 + math.random()
+                local angle = math.random() * 2 * PI
+                gear.Transform:SetPosition(x, y + 1, z)
+                gear.Physics:SetVel(speed * math.cos(angle), speed * 3, speed * math.sin(angle))
+            else
+                gear.Transform:SetPosition(x, y, z)
+            end
+            if gear.components.propagator ~= nil then
+                gear.components.propagator:Delay(5)
             end
         end
-        inst.level = 0
-        applyupgrades(inst)
     end
+
+    inst.level = 0
+    ApplyUpgrades(inst)
 end
 
 local function common_postinit(inst)
     inst:AddTag("electricdamageimmune")
     --electricdamageimmune is for combat and not lightning strikes
     --also used in stategraph for not stomping custom light values
-
-    if TheNet:GetServerGameMode() == "quagmire" then
-        inst:AddTag("quagmire_shopper")
-    end
+    -- immune to poison, but still need the poisonable component
+    inst:RemoveTag("poisonable")
 
     inst.components.talker.mod_str_fn = string.utf8upper
 
@@ -288,7 +302,9 @@ local function common_postinit(inst)
 end
 
 local function master_postinit(inst)
-    inst.starting_inventory = start_inv[TheNet:GetServerGameMode()] or start_inv.default
+    inst.starting_inventory = start_inv.default
+
+    inst.customidlestate = "wx78_funnyidle"
 
     inst.level = 0
     inst.charged_task = nil
@@ -296,35 +312,29 @@ local function master_postinit(inst)
     inst.spark_task = nil
     inst.spark_time = 0
     inst.spark_time_offset = 3
-    inst.watchingrain = false
+    inst.watching_rain = false
 
     if inst.components.eater ~= nil then
         inst.components.eater.ignoresspoilage = true
         inst.components.eater:SetCanEatGears()
-        inst.components.eater:SetOnEatFn(oneat)
+        inst.components.eater:SetOnEatFn(OnEat)
     end
-    applyupgrades(inst)
+    ApplyUpgrades(inst)
 
-    inst:ListenForEvent("ms_respawnedfromghost", onbecamerobot)
-    inst:ListenForEvent("ms_becameghost", onbecameghost)
-    inst:ListenForEvent("death", ondeath)
-    inst:ListenForEvent("ms_playerreroll", ondeath) --delevel, give back some gears
+    inst:ListenForEvent("ms_respawnedfromghost", OnBecameRobot)
+    inst:ListenForEvent("ms_becameghost", OnBecameGhost)
+    inst:ListenForEvent("death", OnDeath)
+    inst:ListenForEvent("ms_playerreroll", OnDeath) --delevel, give back some gears
 
     inst.components.playerlightningtarget:SetHitChance(1)
-    inst.components.playerlightningtarget:SetOnStrikeFn(onlightingstrike)
+    inst.components.playerlightningtarget:SetOnStrikeFn(OnLightingStrike)
 
-    onbecamerobot(inst)
+    OnBecameRobot(inst)
 
-    inst.OnLongUpdate = onlongupdate
-    inst.OnSave = onsave
-    inst.OnLoad = onload
-    inst.OnPreLoad = onpreload
-
-    if TheNet:GetServerGameMode() == "lavaarena" then
-        event_server_data("lavaarena", "prefabs/wx78").master_postinit(inst)
-    elseif TheNet:GetServerGameMode() == "quagmire" then
-        event_server_data("quagmire", "prefabs/wx78").master_postinit(inst)
-    end
+    inst.OnLongUpdate = OnLongUpdate
+    inst.OnSave = OnSave
+    inst.OnLoad = OnLoad
+    inst.OnPreLoad = OnPreLoad
 end
 
 return MakePlayerCharacter("wx78", prefabs, assets, common_postinit, master_postinit)

@@ -32,6 +32,19 @@ end
 
 prefabs = FlattenTree({prefabs, start_inv}, true)
 
+local BOOK_MUST_TAGS = { "book", "shadowmagic" }
+local BOOK_CANT_TAGS = { "INLIMBO", "fueldepleted" }
+local function customidleanimfn(inst)
+	local x, y, z = inst.Transform:GetWorldPosition()
+	for i, v in ipairs(TheSim:FindEntities(x, y, z, 3, BOOK_MUST_TAGS, BOOK_CANT_TAGS)) do
+		if v.isfloating then
+			--secret idle anim near floating codex umbra
+			--takes priority over inst.customidlestate
+			return "idle3_waxwell"
+		end
+	end
+end
+
 local function DoEffects(pet)
     local x, y, z = pet.Transform:GetWorldPosition()
     SpawnPrefab("statue_transition_2").Transform:SetPosition(x, y, z)
@@ -95,6 +108,9 @@ end
 
 local function master_postinit(inst)
     inst.starting_inventory = start_inv.default
+
+    inst.customidleanim = customidleanimfn --priority when not returning nil
+	inst.customidlestate = "waxwell_funnyidle"
 
     inst:AddComponent("reader")
 
