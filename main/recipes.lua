@@ -185,30 +185,43 @@ Recipe2("wall_wood_item",                {Ingredient("boards", 2), Ingredient("r
 Recipe2("waxpaper",                        {Ingredient("papyrus", 1), Ingredient("beeswax", 1)},                                             TECH.SCIENCE_TWO)
 
 --[[ DST Character Crafts ]]
+-- Willow
+Recipe2("lighter",                      {Ingredient("rope", 1), Ingredient("goldnugget", 1), Ingredient("petals", 3)},                      TECH.NONE,				{builder_tag="pyromaniac"})
+Recipe2("bernie_inactive",              {Ingredient("beardhair", 2), Ingredient("beefalowool", 2), Ingredient("silk", 2)},                  TECH.NONE,				{builder_tag="pyromaniac"})
+
+-- Wathgrithr
+Recipe2("spear_wathgrithr",             {Ingredient("twigs", 2), Ingredient("flint", 2), Ingredient("goldnugget", 2)},                      TECH.NONE,		{builder_tag="valkyrie"})
+Recipe2("wathgrithrhat",                {Ingredient("goldnugget", 2), Ingredient("rocks", 2)},                                              TECH.NONE,		{builder_tag="valkyrie"})
+
+-- Wickerbottom
+Recipe2("book_gardening", 	 		    {Ingredient("papyrus", 2), Ingredient("seeds", 1), Ingredient("poop", 1)},							TECH.SCIENCE_ONE,		{builder_tag="bookbuilder"})
+Recipe2("book_birds",                   {Ingredient("papyrus", 2), Ingredient("bird_egg", 2)},												TECH.NONE,				{builder_tag="bookbuilder"})
+Recipe2("book_sleep",                   {Ingredient("papyrus", 2), Ingredient("nightmarefuel", 2)},                                         TECH.MAGIC_TWO,			{builder_tag="bookbuilder"})
+Recipe2("book_brimstone",               {Ingredient("papyrus", 2), Ingredient("redgem", 1)},                                                TECH.MAGIC_THREE,		{builder_tag="bookbuilder"})
+Recipe2("book_tentacles",               {Ingredient("papyrus", 2), Ingredient("tentaclespots", 1)},                                         TECH.SCIENCE_THREE,		{builder_tag="bookbuilder"})
+
+-- Maxwell
+Recipe2("waxwelljournal",				{Ingredient("papyrus", 2), Ingredient("nightmarefuel", 2), Ingredient(CHARACTER_INGREDIENT.HEALTH, 50)},	TECH.NONE,		{builder_tag="shadowmagic"})
+Recipe("shadowlumber_builder",			{Ingredient("nightmarefuel", 2), Ingredient("axe", 1), Ingredient(CHARACTER_INGREDIENT.MAX_SANITY, TUNING.SHADOWWAXWELL_SANITY_PENALTY.SHADOWLUMBER)},		nil, TECH.LOST, nil, nil, true, nil, "shadowmagic")
+Recipe("shadowminer_builder",			{Ingredient("nightmarefuel", 2), Ingredient("pickaxe", 1), Ingredient(CHARACTER_INGREDIENT.MAX_SANITY, TUNING.SHADOWWAXWELL_SANITY_PENALTY.SHADOWMINER)},	nil, TECH.LOST, nil, nil, true, nil, "shadowmagic")
+Recipe("shadowdigger_builder",			{Ingredient("nightmarefuel", 2), Ingredient("shovel", 1), Ingredient(CHARACTER_INGREDIENT.MAX_SANITY, TUNING.SHADOWWAXWELL_SANITY_PENALTY.SHADOWDIGGER)},	nil, TECH.LOST, nil, nil, true, nil, "shadowmagic")
+Recipe("shadowduelist_builder",			{Ingredient("nightmarefuel", 2), Ingredient("spear", 1), Ingredient(CHARACTER_INGREDIENT.MAX_SANITY, TUNING.SHADOWWAXWELL_SANITY_PENALTY.SHADOWDUELIST)},	nil, TECH.LOST, nil, nil, true, nil, "shadowmagic")
+
+-- Webber
+Recipe2("spidereggsack", 				{Ingredient("silk", 12),  Ingredient("spidergland", 4), Ingredient("papyrus", 3)},		TECH.NONE,				{builder_tag="spiderwhisperer", allowautopick = true,})
+
+-- Warly
+Recipe2("portablecookpot_item",         {Ingredient("goldnugget", 2), Ingredient("charcoal", 6), Ingredient("twigs", 6)},               TECH.NONE,              {builder_tag="masterchef"})
+Recipe2("spicepack",                    {Ingredient("cutgrass", 4), Ingredient("twigs", 4), Ingredient("nitre", 2)},                    TECH.NONE,              {builder_tag="masterchef"})
+
+-- Wormwood
+Recipe2("livinglog", 					{Ingredient(CHARACTER_INGREDIENT.HEALTH, 20)},																	TECH.NONE,	{builder_tag="plantkin", sg_state="form_log", actionstr="GROW", allowautopick = true, no_deconstruction=true})
+Recipe2("armor_bramble",				{Ingredient("livinglog", 2), Ingredient("boneshard", 4)},															TECH.NONE,	{builder_tag="plantkin"})
+Recipe2("trap_bramble",					{Ingredient("livinglog", 1), Ingredient("boneshard", 1)},															TECH.NONE,	{builder_tag="plantkin"})
+Recipe2("compostwrap",					{Ingredient("poop", 5), Ingredient("spoiled_food", 2), Ingredient("nitre", 1)}, 								TECH.NONE,	{builder_tag="plantkin"})
+
 -- Winona
 Recipe2("sewing_tape",                    {Ingredient("silk", 1), Ingredient("cutgrass", 3)},                                                TECH.NONE,                {builder_tag="handyperson"})
-Recipe2("winona_catapult",                {Ingredient("sewing_tape", 1), Ingredient("twigs", 3), Ingredient("rocks", 15)},                TECH.NONE,                {builder_tag="basicengineer", placer="winona_catapult_item_placer"})
-Recipe2("winona_spotlight",                {Ingredient("sewing_tape", 1), Ingredient("goldnugget", 2), Ingredient("fireflies", 1)},        TECH.NONE,                {builder_tag="basicengineer", placer="winona_spotlight_item_placer"})
-Recipe2("winona_battery_low",            {Ingredient("sewing_tape", 1), Ingredient("log", 2), Ingredient("nitre", 2)},                    TECH.NONE,                {builder_tag="basicengineer", placer="winona_battery_low_item_placer"})
-Recipe2("winona_battery_high",            {Ingredient("sewing_tape", 1), Ingredient("boards", 2), Ingredient("transistor", 2)},            TECH.NONE,                {builder_tag="basicengineer", placer="winona_battery_high_item_placer"})
-
--- Wurt
-Recipe2("mermhouse_crafted",               {Ingredient("boards", 4), Ingredient("cutreeds", 3), Ingredient("pondfish", 2)},                TECH.SCIENCE_ONE,        {builder_tag="merm_builder", placer="mermhouse_crafted_placer", testfn=IsMarshLand})
-Recipe2("mermthrone_construction",        {Ingredient("boards", 5), Ingredient("rope", 5)},                                                TECH.SCIENCE_ONE,        {builder_tag="merm_builder", placer="mermthrone_construction_placer", testfn=IsMarshLand})
-Recipe2("mermwatchtower",                {Ingredient("boards", 5), Ingredient("tentaclespots", 1), Ingredient("spear", 2)},                TECH.SCIENCE_ONE,        {builder_tag="merm_builder", placer="mermwatchtower_placer", testfn=IsMarshLand})
-Recipe2("wurt_turf_marsh",                {Ingredient("cutreeds", 1), Ingredient("spoiled_food", 2)},                                        TECH.NONE,                {builder_tag="merm_builder", product="turf_marsh", numtogive = 4})
-Recipe2("mermhat",                         {Ingredient("pondfish", 1), Ingredient("cutreeds", 1), Ingredient("twigs", 2)},                 TECH.NONE,                {builder_tag="merm_builder"})
-
--- Wanda --
-local function pocketwatch_nodecon(inst) return not inst:HasTag("pocketwatch_inactive") end
-Recipe2("pocketwatch_dismantler",        {Ingredient("goldnugget", 1), Ingredient("flint", 1), Ingredient("twigs", 3)},                                    TECH.NONE,            {builder_tag="clockmaker"})
-Recipe2("pocketwatch_parts",            {Ingredient("pocketwatch_dismantler", 0), Ingredient("thulecite_pieces", 8),Ingredient("nightmarefuel", 2)},    TECH.NONE,            {builder_tag="clockmaker"})
-Recipe2("pocketwatch_heal",                {Ingredient("pocketwatch_parts", 1), Ingredient("marble", 2), Ingredient("redgem", 1)},                            TECH.NONE,            {builder_tag="clockmaker", no_deconstruction = pocketwatch_nodecon})
-Recipe2("pocketwatch_revive",            {Ingredient("pocketwatch_parts", 1), Ingredient("livinglog", 2), Ingredient("boneshard", 4)},                    TECH.NONE,            {builder_tag="clockmaker", no_deconstruction = pocketwatch_nodecon})
-Recipe2("pocketwatch_warp",                {Ingredient("pocketwatch_parts", 1), Ingredient("goldnugget", 2)},                                                TECH.NONE,            {builder_tag="clockmaker", no_deconstruction = pocketwatch_nodecon})
-Recipe2("pocketwatch_recall",            {Ingredient("pocketwatch_parts", 2), Ingredient("goldnugget", 2), Ingredient("walrus_tusk", 1)},                TECH.MAGIC_TWO,        {builder_tag="clockmaker", no_deconstruction = pocketwatch_nodecon})
-Recipe2("pocketwatch_portal",            {Ingredient("pocketwatch_recall", 1, nil, true), Ingredient("purplegem", 1)},                                    TECH.MAGIC_TWO,        {builder_tag="clockmaker", no_deconstruction = pocketwatch_nodecon, actionstr="SOCKET"})
-Recipe2("pocketwatch_weapon",            {Ingredient("pocketwatch_parts", 3), Ingredient("marble", 4), Ingredient("nightmarefuel", 8)},                    TECH.MAGIC_THREE,    {builder_tag="clockmaker", no_deconstruction = pocketwatch_nodecon})
 
 --[[ DST Regular Crafts ]]
 Recipe2("cartographydesk",                {Ingredient("compass", 1),Ingredient("boards", 4)},                                                TECH.SCIENCE_ONE,            {placer="cartographydesk_placer",        min_spacing=2})

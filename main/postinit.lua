@@ -166,6 +166,7 @@ modimport("postinit/groundcreepentity")
 modimport("postinit/soundemitter")
 modimport("postinit/preparedfoods")
 modimport("postinit/skilltrees")
+modimport("postinit/characters")
 
 
 for _, file_name in ipairs(behaviour_posts) do
