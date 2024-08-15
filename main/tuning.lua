@@ -594,6 +594,10 @@ local tuning = {
     THUNDERBIRD_RUN_SPEED = 5.5,
     THUNDERBIRD_WALK_SPEED = 2,
     THUNDERBIRD_HEALTH = 50,
+
+    WILLOW_SANITY_CHILLING = -20,
+    WILLOW_CHILL_START = 0.4,
+    WILLOW_CHILL_END = 0,
 }
 
 
@@ -656,7 +660,7 @@ TUNING.PROTOTYPER_TREES.HOGUSPORKUSATOR = TechTree.Create({
     MAGIC = 2,
 })
 
-TUNING.GAMEMODE_STARTING_ITEMS.DEFAULT = {
+local default_starting_items = {
     WILSON = {},
     WILLOW = {"lighter", "bernie_inactive"},
     WENDY = {"abigail_flower"},
@@ -667,16 +671,15 @@ TUNING.GAMEMODE_STARTING_ITEMS.DEFAULT = {
     WAXWELL = {"waxwelljournal", "nightmarefuel", "nightmarefuel", "nightmarefuel", "nightmarefuel", "nightmarefuel", "nightmarefuel"},
     WOODIE = {"lucy"},
     WATHGRITHR = {"spear_wathgrithr", "wathgrithrhat", "meat", "meat", "meat", "meat"},
-    WEBBER = {"spidereggsack", "monstermeat", "monstermeat", "spider_whistle"},
+    WEBBER = {"spidereggsack", "monstermeat", "monstermeat"},
     WINONA = {"sewing_tape", "sewing_tape", "sewing_tape"},
-    WORTOX = {"wortox_soul", "wortox_soul", "wortox_soul", "wortox_soul", "wortox_soul", "wortox_soul"},
     WORMWOOD = {},
     WARLY = {"portablecookpot_item", "potato", "potato", "garlic"},
-    WURT = {},
-    WALTER = {"walterhat", "slingshot", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock"},
-    WANDA = {"pocketwatch_heal", "pocketwatch_parts", "pocketwatch_parts", "pocketwatch_parts"},
-    WONKEY = {},
 }
+
+for character, starting_items in pairs(default_starting_items) do
+    TUNING.GAMEMODE_STARTING_ITEMS.DEFAULT[character] = starting_items
+end
 
 for key, value in pairs(tuning) do
     if TUNING[key] then

@@ -7,6 +7,9 @@ local assets =
     Asset("ANIM", "anim/player_wolfgang.zip"),
     Asset("ANIM", "anim/player_mount_wolfgang.zip"),
     Asset("SOUND", "sound/wolfgang.fsb"),
+    Asset("ANIM", "anim/player_idles_wolfgang.zip"),
+    Asset("ANIM", "anim/player_idles_wolfgang_skinny.zip"),
+    Asset("ANIM", "anim/player_idles_wolfgang_mighty.zip"),
 }
 
 local start_inv =

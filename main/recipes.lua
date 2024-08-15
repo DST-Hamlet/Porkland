@@ -189,6 +189,9 @@ Recipe2("waxpaper",                        {Ingredient("papyrus", 1), Ingredient
 Recipe2("lighter",                      {Ingredient("rope", 1), Ingredient("goldnugget", 1), Ingredient("petals", 3)},                      TECH.NONE,				{builder_tag="pyromaniac"})
 Recipe2("bernie_inactive",              {Ingredient("beardhair", 2), Ingredient("beefalowool", 2), Ingredient("silk", 2)},                  TECH.NONE,				{builder_tag="pyromaniac"})
 
+-- Wendy
+Recipe2("abigail_flower",				{Ingredient("petals", 6), Ingredient("nightmarefuel", 1)},									TECH.NONE,				{builder_tag="ghostlyfriend"})
+
 -- Wathgrithr
 Recipe2("spear_wathgrithr",             {Ingredient("twigs", 2), Ingredient("flint", 2), Ingredient("goldnugget", 2)},                      TECH.NONE,		{builder_tag="valkyrie"})
 Recipe2("wathgrithrhat",                {Ingredient("goldnugget", 2), Ingredient("rocks", 2)},                                              TECH.NONE,		{builder_tag="valkyrie"})
@@ -206,6 +209,9 @@ Recipe("shadowlumber_builder",			{Ingredient("nightmarefuel", 2), Ingredient("ax
 Recipe("shadowminer_builder",			{Ingredient("nightmarefuel", 2), Ingredient("pickaxe", 1), Ingredient(CHARACTER_INGREDIENT.MAX_SANITY, TUNING.SHADOWWAXWELL_SANITY_PENALTY.SHADOWMINER)},	nil, TECH.LOST, nil, nil, true, nil, "shadowmagic")
 Recipe("shadowdigger_builder",			{Ingredient("nightmarefuel", 2), Ingredient("shovel", 1), Ingredient(CHARACTER_INGREDIENT.MAX_SANITY, TUNING.SHADOWWAXWELL_SANITY_PENALTY.SHADOWDIGGER)},	nil, TECH.LOST, nil, nil, true, nil, "shadowmagic")
 Recipe("shadowduelist_builder",			{Ingredient("nightmarefuel", 2), Ingredient("spear", 1), Ingredient(CHARACTER_INGREDIENT.MAX_SANITY, TUNING.SHADOWWAXWELL_SANITY_PENALTY.SHADOWDUELIST)},	nil, TECH.LOST, nil, nil, true, nil, "shadowmagic")
+
+-- Wes
+Recipe2("balloons_empty",				{Ingredient("waterballoon", 4)},																				TECH.NONE,	{builder_tag="balloonomancer", sg_state="makeballoon"})
 
 -- Webber
 Recipe2("spidereggsack", 				{Ingredient("silk", 12),  Ingredient("spidergland", 4), Ingredient("papyrus", 3)},		TECH.NONE,				{builder_tag="spiderwhisperer", allowautopick = true,})

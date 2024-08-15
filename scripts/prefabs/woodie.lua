@@ -18,6 +18,7 @@ local assets =
     Asset("IMAGE", "images/colour_cubes/beaver_vision_cc.tex"),
 
     Asset("ANIM", "anim/ghost_werebeaver_build.zip"),
+    Asset("ANIM", "anim/player_idles_woodie.zip"),
 }
 
 local prefabs =
@@ -616,6 +617,11 @@ end
 
 --------------------------------------------------------------------------
 
+local function customidleanimfn(inst)
+    local item = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
+    return item ~= nil and item.prefab == "lucy" and "idle_woodie" or nil
+end
+
 local function common_postinit(inst)
     inst:AddTag("woodcutter")
     inst:AddTag("polite")
@@ -648,6 +654,8 @@ end
 
 local function master_postinit(inst)
     inst.starting_inventory = start_inv.default
+
+    inst.customidleanim = customidleanimfn
 
     -- Give Woodie a beard so he gets some insulation from winter cold
     -- (Value is Wilson's level 2 beard.)

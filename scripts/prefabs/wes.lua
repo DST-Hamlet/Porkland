@@ -3,6 +3,7 @@ local MakePlayerCharacter = require("prefabs/player_common")
 local assets =
 {
     Asset("SCRIPT", "scripts/prefabs/player_common.lua"),
+    Asset("ANIM", "anim/player_idles_wes.zip"),
     Asset("ANIM", "anim/player_mount_wes.zip"),
     Asset("ANIM", "anim/player_mime.zip"),
 }
@@ -32,10 +33,14 @@ end
 local function common_postinit(inst)
     inst:AddTag("mime")
     inst:AddTag("balloonomancer")
+
+    inst.AnimState:AddOverrideBuild("player_idles_wes")
 end
 
 local function master_postinit(inst)
     inst.starting_inventory = start_inv.default
+
+    	inst.customidlestate = "wes_funnyidle"
 
     inst.customidlestate = "wes_funnyidle"
 

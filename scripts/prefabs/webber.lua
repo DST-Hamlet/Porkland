@@ -5,6 +5,7 @@ local assets =
     Asset("SCRIPT", "scripts/prefabs/player_common.lua"),
     Asset("SOUND", "sound/webber.fsb"),
     Asset("ANIM", "anim/beard_silk.zip"),
+    Asset("ANIM", "anim/player_idles_webber.zip"),
 }
 
 local prefabs =

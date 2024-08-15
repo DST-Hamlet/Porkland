@@ -3,6 +3,7 @@ local MakePlayerCharacter = require("prefabs/player_common")
 local assets =
 {
     Asset("SCRIPT", "scripts/prefabs/player_common.lua"),
+    Asset("ANIM", "anim/player_idles_wendy.zip"),
     Asset("SOUND", "sound/wendy.fsb"),
 }
 
@@ -26,6 +27,7 @@ prefabs = FlattenTree({prefabs, start_inv}, true)
 
 local function common_postinit(inst)
     inst:AddTag("ghostlyfriend")
+    inst.AnimState:AddOverrideBuild("player_idles_wendy")
 end
 
 local function OnDespawn(inst)
@@ -60,6 +62,8 @@ end
 
 local function master_postinit(inst)
     inst.starting_inventory = start_inv.default
+
+    inst.customidleanim = "idle_wendy"
 
     inst.components.sanity.night_drain_mult = TUNING.WENDY_SANITY_MULT
     inst.components.sanity.neg_aura_mult = TUNING.WENDY_SANITY_MULT

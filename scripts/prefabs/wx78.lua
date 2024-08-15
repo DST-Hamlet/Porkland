@@ -4,6 +4,7 @@ local assets =
 {
     Asset("SCRIPT", "scripts/prefabs/player_common.lua"),
     Asset("SOUND", "sound/wx78.fsb"),
+    Asset("ANIM", "anim/player_idles_wx.zip"),
 }
 
 local prefabs =

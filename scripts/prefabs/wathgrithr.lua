@@ -3,6 +3,7 @@ local MakePlayerCharacter = require("prefabs/player_common")
 local assets =
 {
     Asset("SCRIPT", "scripts/prefabs/player_common.lua"),
+    Asset("ANIM", "anim/player_idles_wathgrithr.zip"),
     Asset("SOUND", "sound/wathgrithr.fsb"),
 }
 
@@ -117,14 +118,13 @@ local function common_postinit(inst)
     inst:AddTag("valkyrie")
     inst:RemoveTag("usesvegetarianequipment") -- batnosehat
 
-    inst.AnimState:AddOverrideBuild("wathgrithr_sing")
-    inst.customidleanim = "idle_wathgrithr"
-
     inst.components.talker.mod_str_fn = Umlautify
 end
 
 local function master_postinit(inst)
     inst.starting_inventory = start_inv.default
+
+    inst.customidleanim = "idle_wathgrithr"
 
     inst.talker_path_override = "dontstarve_DLC001/characters/"
 
