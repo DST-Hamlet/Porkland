@@ -59,6 +59,8 @@ local function OnEat(inst, food)
     inst.SoundEmitter:PlaySound("dontstarve/characters/wx78/levelup")
 end
 
+local SPEED_BONUS_NAME = "WX_CHARGE"
+
 local function OnUpdate(inst, dt)
     inst.charge_time = inst.charge_time - dt
     if inst.charge_time <= 0 then
@@ -70,21 +72,21 @@ local function OnUpdate(inst, dt)
         inst.SoundEmitter:KillSound("overcharge_sound")
         inst:RemoveTag("overcharge")
         inst.Light:Enable(false)
-        inst.components.locomotor.runspeed = TUNING.WILSON_RUN_SPEED
+        inst.components.locomotor:RemoveExternalSpeedMultiplier(inst, SPEED_BONUS_NAME)
         inst.components.bloomer:PopBloom("overcharge")
         inst.components.temperature.mintemp = -20
         inst.components.talker:Say(GetString(inst, "ANNOUNCE_DISCHARGE"))
     else
-        local runspeed_bonus = .5
+        local runspeed_bonus = 0.5
         local rad = 3
         if inst.charge_time < 60 then
-            rad = math.max(.1, rad * (inst.charge_time / 60))
-            runspeed_bonus = (inst.charge_time / 60)*runspeed_bonus
+            rad = math.max(0.1, rad * (inst.charge_time / 60))
+            runspeed_bonus = (inst.charge_time / 60) * runspeed_bonus
         end
 
         inst.Light:Enable(true)
         inst.Light:SetRadius(rad)
-        inst.components.locomotor.runspeed = TUNING.WILSON_RUN_SPEED*(1+runspeed_bonus)
+        inst.components.locomotor:SetExternalSpeedMultiplier(inst, SPEED_BONUS_NAME, 1 + runspeed_bonus)
         inst.components.temperature.mintemp = 10
     end
 end
@@ -121,6 +123,7 @@ local function StartOvercharge(inst, duration)
 
     inst.SoundEmitter:KillSound("overcharge_sound")
     inst.SoundEmitter:PlaySound("dontstarve/characters/wx78/charged", "overcharge_sound")
+    inst.SoundEmitter:SetParameter("overcharge_sound", "intensity", 0.5) -- keep it quiet
     inst.components.bloomer:PushBloom("overcharge", "shaders/anim.ksh", 50)
 
     if inst.charged_task == nil then
@@ -145,6 +148,7 @@ local function OnLightingStrike(inst)
         if inst.components.inventory:IsInsulated() then
             inst:PushEvent("lightningdamageavoided")
         else
+            inst.sg:GoToState("electrocute")
             inst.components.health:DoDelta(TUNING.HEALING_SUPERHUGE, false, "lightning")
             inst.components.sanity:DoDelta(-TUNING.SANITY_LARGE)
             inst.components.talker:Say(GetString(inst, "ANNOUNCE_CHARGE"))
@@ -155,74 +159,44 @@ local function OnLightingStrike(inst)
 end
 
 local function DoRainSparks(inst, dt)
-    if inst.components.moisture ~= nil and inst.components.moisture:GetMoisture() > 0 then
-        local t = GetTime()
+    if not inst.components.moisture or inst.components.moisture:GetMoisture() <= 0 then
+        return
+    end
 
-        -- Raining, no moisture-giving equipment on head, and moisture is increasing. Pro-rate damage based on waterproofness.
-        if inst.components.inventory:GetEquippedMoistureRate(EQUIPSLOTS.HEAD) <= 0 and inst.components.moisture:GetRate() > 0 then
-            local waterproofmult =
-                (   inst.components.sheltered ~= nil and
-                    inst.components.sheltered.sheltered and
-                    inst.components.sheltered.waterproofness or 0
-                ) +
-                (   inst.components.inventory ~= nil and
-                    inst.components.inventory:GetWaterproofness() or 0
-                )
-            if waterproofmult < 1 and t > inst.spark_time + inst.spark_time_offset + waterproofmult * 7 then
-                inst.components.health:DoDelta(TUNING.WX78_MAX_MOISTURE_DAMAGE, false, "rain")
-                inst.spark_time_offset = 3 + math.random() * 2
-                inst.spark_time = t
-                local x, y, z = inst.Transform:GetWorldPosition()
-                SpawnPrefab("sparks").Transform:SetPosition(x, y + 1 + math.random() * 1.5, z)
-            end
-        elseif t > inst.spark_time + inst.spark_time_offset then -- We have moisture-giving equipment on our head or it is not raining and we are just passively wet (but drying off). Do full damage.
-            inst.components.health:DoDelta(
-                inst.components.moisture:GetRate() >= 0 and
-                TUNING.WX78_MAX_MOISTURE_DAMAGE or
-                TUNING.WX78_MOISTURE_DRYING_DAMAGE,
-                false, "water")
+    local t = GetTime()
+
+    -- Raining, no moisture-giving equipment on head, and moisture is increasing. Pro-rate damage based on waterproofness.
+    if inst.components.inventory:GetEquippedMoistureRate(EQUIPSLOTS.HEAD) <= 0 and inst.components.moisture:GetRate() > 0 then
+        local waterproofmult =
+            (   inst.components.sheltered ~= nil and
+                inst.components.sheltered.sheltered and
+                inst.components.sheltered.waterproofness or 0
+            ) +
+            (   inst.components.inventory ~= nil and
+                inst.components.inventory:GetWaterproofness() or 0
+            )
+        if waterproofmult < 1 and t > inst.spark_time + inst.spark_time_offset + waterproofmult * 7 then
+            inst.components.health:DoDelta(TUNING.WX78_MAX_MOISTURE_DAMAGE, false, "rain")
             inst.spark_time_offset = 3 + math.random() * 2
             inst.spark_time = t
             local x, y, z = inst.Transform:GetWorldPosition()
-            SpawnPrefab("sparks").Transform:SetPosition(x, y + .25 + math.random() * 2, z)
+            SpawnPrefab("sparks").Transform:SetPosition(x, y + 1 + math.random() * 1.5, z)
         end
-    end
-end
-
-local function OnIsRaining(inst, israining)
-    if israining then
-        if inst.spark_task == nil then
-            inst.spark_task = inst:DoPeriodicTask(0.1, DoRainSparks, nil, 0.1)
-        end
-    elseif inst.spark_task ~= nil then
-        inst.spark_task:Cancel()
-        inst.spark_task = nil
-    end
-end
-
-local function OnIsFoggy(inst, fog_state)
-    if fog_state ~= FOG_STATE.CLEAR then
-        if inst.spark_task == nil then
-            inst.spark_task = inst:DoPeriodicTask(0.1, DoRainSparks, nil, 0.1)
-        end
-    elseif inst.spark_task ~= nil then
-        inst.spark_task:Cancel()
-        inst.spark_task = nil
+    elseif t > inst.spark_time + inst.spark_time_offset then -- We have moisture-giving equipment on our head or it is not raining and we are just passively wet (but drying off). Do full damage.
+        inst.components.health:DoDelta(
+            inst.components.moisture:GetRate() >= 0 and
+            TUNING.WX78_MAX_MOISTURE_DAMAGE or
+            TUNING.WX78_MOISTURE_DRYING_DAMAGE,
+            false, "water")
+        inst.spark_time_offset = 3 + math.random() * 2
+        inst.spark_time = t
+        local x, y, z = inst.Transform:GetWorldPosition()
+        SpawnPrefab("sparks").Transform:SetPosition(x, y + .25 + math.random() * 2, z)
     end
 end
 
 local function OnBecameRobot(inst)
-    if not inst.watching_rain then
-        inst.watching_rain = true
-        inst:WatchWorldState("israining", OnIsRaining)
-        OnIsRaining(inst, TheWorld.state.israining)
-    end
-
-    if not inst.watching_fog then
-        inst.watching_fog = true
-        inst:WatchWorldState("fogstate", OnIsFoggy)
-        OnIsFoggy(inst, TheWorld.state.fogstate)
-    end
+    inst.spark_task = inst:DoPeriodicTask(0.1, DoRainSparks, nil, 0.1)
 
     --Override with overcharge light values
     inst.Light:Enable(false)
@@ -248,16 +222,6 @@ local function OnBecameGhost(inst)
     if inst.spark_task ~= nil then
         inst.spark_task:Cancel()
         inst.spark_task = nil
-    end
-
-    if inst.watching_rain then
-        inst.watching_rain = false
-        inst:StopWatchingWorldState("israining", OnIsRaining)
-    end
-
-    if inst.watching_fog then
-        inst.watching_fog = false
-        inst:StopWatchingWorldState("fog_state", OnIsFoggy)
     end
 end
 
