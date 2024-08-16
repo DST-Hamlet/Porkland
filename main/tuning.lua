@@ -598,6 +598,8 @@ local tuning = {
     WILLOW_SANITY_CHILLING = -20,
     WILLOW_CHILL_START = 0.4,
     WILLOW_CHILL_END = 0,
+
+    WOLFGANG_HUNGER = 300,
 }
 
 
